@@ -1,10 +1,21 @@
-# Raw and processed data
+# Data (do not commit raw/processed datasets)
 data/raw/
 data/processed/
 *.pbf
+*.gpkg
+*.parquet
+*.feather
+*.mbtiles
 
 # Python
 __pycache__/
 *.pyc
 .venv/
+env/
 .ipynb_checkpoints/
+
+# OS / Editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
