@@ -54,34 +54,31 @@ def read_osm_roads_from_pbf(
     highway_types: tuple[str, ...] = ("motorway", "trunk", "primary"),
 ) -> gpd.GeoDataFrame:
     """
-    Reads OSM roads from a local PBF file using pyrosm, filters by highway types,
-    clips to SP boundary, and returns a GeoDataFrame in WGS84.
+    Reads OSM roads from a local PBF file using pyrosm (custom criteria),
+    filters major highways, clips to SP boundary, and returns a GeoDataFrame in WGS84.
     """
     if OSM is None:
-        raise ImportError(
-            "pyrosm is not available. Install it with: pip install pyrosm"
-        )
+        raise ImportError("pyrosm is not available. Install it with: pip install pyrosm")
 
     pbf_path = Path(pbf_path)
     osm = OSM(str(pbf_path))
 
-    # pyrosm can filter on OSM 'highway' tag
-    roads = osm.get_network(
-        network_type="driving",
+    # Read OSM ways that match highway tag (more robust than get_network)
+    roads = osm.get_data_by_custom_criteria(
+        custom_filter={"highway": list(highway_types)},
+        filter_type="keep",
+        keep_nodes=False,
+        keep_relations=False,
         extra_attributes=["name", "ref", "highway", "maxspeed", "oneway", "bridge", "tunnel", "layer"],
     )
 
     roads = roads.to_crs(PROJECT_CRS)
 
-    # Keep only major road classes (cleaner story + faster)
-    if "highway" in roads.columns:
-        roads = roads[roads["highway"].isin(highway_types)].copy()
-
     # Clip to SP boundary
     sp_geom = boundary.geometry.iloc[0]
     roads = gpd.clip(roads, sp_geom)
 
-    # Basic cleanup
+    # Cleanup
     roads = roads[~roads.geometry.is_empty & roads.geometry.notna()].copy()
     roads.reset_index(drop=True, inplace=True)
 

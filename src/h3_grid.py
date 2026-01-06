@@ -2,26 +2,54 @@ from __future__ import annotations
 
 from pathlib import Path
 import geopandas as gpd
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, MultiPolygon
 import h3
+from h3.api.basic_str import LatLngPoly, LatLngMultiPoly
+
 
 PROJECT_CRS = "EPSG:4326"
 
 
+def _ring_lonlat_to_latlng(ring_coords):
+    """
+    Shapely rings come as (lon, lat). H3 expects (lat, lon).
+    """
+    return [(lat, lon) for lon, lat in ring_coords]
+
+
+def _polygon_to_latlngpoly(poly: Polygon) -> LatLngPoly:
+    exterior = _ring_lonlat_to_latlng(list(poly.exterior.coords))
+    holes = []
+    for interior in poly.interiors:
+        holes.append(_ring_lonlat_to_latlng(list(interior.coords)))
+    return LatLngPoly(exterior, holes)
+
+
 def _geom_to_h3_cells(geom, resolution: int) -> list[str]:
     """
-    Converts a shapely geometry to a list of H3 cell IDs (polyfill).
+    Converts shapely Polygon/MultiPolygon to H3 cells using h3-py v4 shapes.
     """
-    if geom.is_empty:
+    if geom is None or geom.is_empty:
         return []
 
-    # h3 expects GeoJSON-like mapping in (lon, lat)
-    geojson = {
-        "type": "Polygon",
-        "coordinates": [list(geom.exterior.coords)],
-    }
+    # Fix occasional invalid geometries
+    try:
+        if not geom.is_valid:
+            geom = geom.buffer(0)
+    except Exception:
+        pass
 
-    return list(h3.polygon_to_cells(geojson, res=resolution))
+    if geom.geom_type == "Polygon":
+        h3shape = _polygon_to_latlngpoly(geom)
+        return list(h3.polygon_to_cells(h3shape, res=resolution))
+
+    if geom.geom_type == "MultiPolygon":
+        polys = [_polygon_to_latlngpoly(p) for p in geom.geoms]
+        h3shape = LatLngMultiPoly(*polys)
+        return list(h3.polygon_to_cells(h3shape, res=resolution))
+
+    raise TypeError(f"Unsupported geometry type: {geom.geom_type}")
+
 
 
 def h3_cells_to_gdf(cells: list[str]) -> gpd.GeoDataFrame:
