@@ -1,0 +1,10 @@
+# Raw and processed data
+data/raw/
+data/processed/
+*.pbf
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
