@@ -9,7 +9,8 @@ import folium
 from streamlit_folium import st_folium
 
 
-DATA_PATH = Path("data/processed/hex_metrics_res6.geojson")
+#DATA_PATH = Path("data/processed/hex_metrics_res6.geojson")
+DATA_PATH = Path("data/processed/hex_metrics_res6_deploy.geojson")
 BOUNDARY_PATH = Path("data/processed/sp_boundary.geojson")
 
 st.set_page_config(
