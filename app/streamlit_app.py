@@ -18,6 +18,30 @@ st.set_page_config(
 )
 
 st.title("Infrastructure–Environment Exposure Explorer")
+with st.expander("About this project"):
+    st.markdown(
+        """
+        **What this app shows**
+
+        This app explores where road infrastructure overlaps with natural environments
+        in São Paulo State (Brazil), using open data and H3 hexagonal aggregation.
+
+        **Exposure score**
+
+        The exposure score is a simple, interpretable proxy defined as:
+
+        `exposure_score = road_length_km × (biome_area_pct / 100)`
+
+        It is **not a risk or impact model**, but an exploratory metric to highlight
+        areas where infrastructure and natural landscapes spatially intersect.
+
+        **Data sources**
+        - São Paulo state boundary: IBGE
+        - Biomes: IBGE
+        - Roads: OpenStreetMap
+        """
+    )
+
 st.caption("Case Study: São Paulo State, Brazil — Open data + H3 aggregation (resolution 6)")
 
 # -------- Load data --------
