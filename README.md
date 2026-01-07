@@ -1,3 +1,5 @@
+**Live demo:** https://infrastructure-environment-exposure.streamlit.app/
+
 ## Overview
 A geospatial web application that explores where road infrastructure overlaps with natural environments in São Paulo State (Brazil) using open data and H3 hexagonal aggregation (resolution 6).
 
