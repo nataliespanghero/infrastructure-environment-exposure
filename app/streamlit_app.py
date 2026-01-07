@@ -11,7 +11,7 @@ from streamlit_folium import st_folium
 
 #DATA_PATH = Path("data/processed/hex_metrics_res6.geojson")
 DATA_PATH = Path("data/processed/hex_metrics_res6_deploy.geojson")
-BOUNDARY_PATH = Path("data/processed/sp_boundary.geojson")
+
 
 st.set_page_config(
     page_title="Infrastructure–Environment Exposure Explorer (São Paulo)",
@@ -49,20 +49,13 @@ st.caption("Case Study: São Paulo State, Brazil — Open data + H3 aggregation 
 @st.cache_data(show_spinner=False)
 def load_hexes() -> gpd.GeoDataFrame:
     gdf = gpd.read_file(DATA_PATH)
-    # Ensure expected columns exist
     expected = {"h3", "road_length_km", "dominant_biome", "biome_area_pct", "exposure_score"}
     missing = expected - set(gdf.columns)
     if missing:
         raise ValueError(f"Missing columns in hex metrics: {missing}")
     return gdf
 
-@st.cache_data(show_spinner=False)
-def load_boundary() -> gpd.GeoDataFrame:
-    return gpd.read_file(BOUNDARY_PATH)
-
-
 hexes = load_hexes()
-boundary = load_boundary()
 
 # -------- Sidebar filters --------
 st.sidebar.header("Filters")
@@ -94,14 +87,20 @@ col4.metric("Max exposure score", f"{filtered['exposure_score'].max():.2f}" if l
 st.divider()
 
 # -------- Map --------
-# Center map around São Paulo
-centroid = boundary.geometry.iloc[0].centroid
-m = folium.Map(location=[centroid.y, centroid.x], zoom_start=7, tiles="CartoDB positron")
+# Center map using hex dataset bounds (no external boundary file required)
+minx, miny, maxx, maxy = hexes.total_bounds
+center_lat = (miny + maxy) / 2
+center_lon = (minx + maxx) / 2
 
-# Boundary outline
+m = folium.Map(location=[center_lat, center_lon], zoom_start=7, tiles="CartoDB positron")
+
+# Optional outline derived from hex geometries (lightweight)
+outline = hexes.unary_union
+outline_gdf = gpd.GeoDataFrame(geometry=[outline], crs="EPSG:4326")
+
 folium.GeoJson(
-    boundary,
-    name="São Paulo boundary",
+    outline_gdf,
+    name="São Paulo outline (derived)",
     style_function=lambda x: {"weight": 2, "fillOpacity": 0},
 ).add_to(m)
 
