@@ -1,4 +1,4 @@
-from __future__ import annotations
+istfrom __future__ import annotations
 
 from pathlib import Path
 
@@ -155,5 +155,5 @@ st.dataframe(
 
 st.divider()
 st.caption(
-    "Developed by Natalie Spanghero — Geospatial Analyst & Python Developer · Open-data portfolio project"
+    "Developed by Natalie Spanghero — Geospatial Specialist · Open-data portfolio project"
 )
