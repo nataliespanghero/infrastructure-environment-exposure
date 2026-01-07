@@ -152,3 +152,8 @@ st.dataframe(
     filtered[["h3", "dominant_biome", "biome_area_pct", "road_length_km", "exposure_score"]].head(50),
     use_container_width=True,
 )
+
+st.divider()
+st.caption(
+    "Developed by Natalie Spanghero — Geospatial Analyst & Python Developer · Open-data portfolio project"
+)
