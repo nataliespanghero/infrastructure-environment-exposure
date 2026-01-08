@@ -1,5 +1,5 @@
 ## Interactive Application
-![Infrastructure Environment Exposure](assets/screenshots/Infrastructure–Environment Exposure Explorer (São Paulo).png)
+![Infrastructure Environment Exposure](assets/screenshots/infrastructure_environment_exposure_sp.png)
 
 **Live demo:** https://infrastructure-environment-exposure.streamlit.app/
 
